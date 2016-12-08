@@ -1,0 +1,14 @@
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\Interop.MapObjects2.dll
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\AxInterop.MapObjects2.dll
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.csproj.ResolveComReference.cache
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.Form1.resources
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.Properties.Resources.resources
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.csproj.GenerateResource.Cache
+D:\VS_project\DXApplication2\MapUtils\bin\Debug\MapUtils.exe.config
+D:\VS_project\DXApplication2\MapUtils\bin\Debug\MapUtils.exe
+D:\VS_project\DXApplication2\MapUtils\bin\Debug\MapUtils.pdb
+D:\VS_project\DXApplication2\MapUtils\bin\Debug\Interop.MapObjects2.dll
+D:\VS_project\DXApplication2\MapUtils\bin\Debug\AxInterop.MapObjects2.dll
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.exe
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.pdb
+D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.csprojResolveAssemblyReference.cache
