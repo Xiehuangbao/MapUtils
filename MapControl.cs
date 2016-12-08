@@ -794,6 +794,33 @@ namespace MapUtils
             _MapScaleChangedEventArgs args = new _MapScaleChangedEventArgs(this.scale);
             OnScaleChanged(args);
         }
+        /// <summary>
+        /// 获取当前所有业务点Id
+        /// </summary>
+        /// <returns>业务点Id列表</returns>
+        public List<int> getCurrentIdArray()
+        {
+            List<int> result = new List<int>();
+            if (businessPoint != null)
+            {
+                try
+                {
+                    Recordset rest = businessPoint.Records;
+                    while (rest.EOF != true)
+                    {
+                        int id = (int)rest.Fields.Item("id").Value;
+                        result.Add(id);
+                        rest.MoveNext();
+                    }
+                }
+                catch (Exception e)
+                {
+                    return new List<int>();
+                }
+               
+            }
+            return result;
+        }
     }
     
     /// <summary>
