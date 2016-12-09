@@ -7,6 +7,8 @@ using MapObjects2;
 using AxMapObjects2;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Transactions;
+using System.IO;
 
 namespace MapUtils
 {
@@ -30,6 +32,8 @@ namespace MapUtils
         //private TextBox tb = null;
 
         private int clickedId;
+
+        private DataConnection dc = new DataConnectionClass();
 
         private MapLayer layer1 = new MapLayerClass();
         private MapLayer layer2 = new MapLayerClass();
@@ -90,6 +94,8 @@ namespace MapUtils
                     this.map.MousePointer = MousePointerConstants.moPanning;
                     this.map.Pan();
                     this.map.MousePointer = MousePointerConstants.moDefault;
+                    _MapClickedEventArgs ea = new _MapClickedEventArgs(e.x, e.y, this.map.ToMapPoint(e.x, e.y));
+                    OnMapClicked(ea);
                     break;
             }
 
@@ -102,25 +108,14 @@ namespace MapUtils
         /// <param name="e"></param>
         private void Map_MouseMoveEvent(object sender, AxMapObjects2._DMapEvents_MouseMoveEvent e)
         {
-            MapLayer lyr = new MapLayerClass();
-            int c = map.Layers.Count;
-            for (int i = 0; i < c; i++)
-            {
-                lyr = (MapLayer)map.Layers.Item(i);
-                if (lyr.Tag == "businessPoint")
-                {
-                    break;
-                }
-                lyr = null;
-            }
-            if (lyr != null)
+            if (businessPoint != null)
             {
                 Recordset rest;
                 MapObjects2.Point curp = map.ToMapPoint(e.x, e.y);
-                rest = lyr.SearchByDistance(curp, (double)map.ToMapDistance(5f), "");
+                rest = businessPoint.SearchByDistance(curp, (double)map.ToMapDistance(5f), "");
                 if (rest.EOF != true)
                 {
-                    clickedId = (int)rest.Fields.Item("Id").Value;
+                    clickedId = Convert.ToInt32(rest.Fields.Item("Id").Value);
                     map.MousePointer = MousePointerConstants.moHotLink;
                     mouseSymbol = "hand";
                 }
@@ -275,9 +270,10 @@ namespace MapUtils
         {
             this.dataBase = dataDirectory;
 
+            restoreFile();
             //定义数据连接和图层
             #region
-            DataConnection dc = new DataConnectionClass();
+            
             
             #endregion
             dc.Database = this.dataBase+"\\CSX";                //指定连接位置
@@ -532,12 +528,24 @@ namespace MapUtils
         /// 比例尺改变事件
         /// </summary>
         public event MapScaleChangedEvnetHandler ScaleChangedEvent;
-
         public virtual void OnScaleChanged(_MapScaleChangedEventArgs e)
         {
             if (ScaleChangedEvent != null)
             {
                 ScaleChangedEvent(this, e);
+            }
+        }
+
+        public delegate void MapClickEventHandler(object sender, _MapClickedEventArgs e);
+        /// <summary>
+        /// 地图非业务点点击事件
+        /// </summary>
+        public event MapClickEventHandler MapClickedEvent;
+        public virtual void OnMapClicked(_MapClickedEventArgs e)
+        {
+            if (MapClickedEvent != null)
+            {
+                MapClickedEvent(this, e);
             }
         }
         /// <summary>
@@ -553,9 +561,10 @@ namespace MapUtils
                 {
                     while (set.EOF != true)
                     {
-                        set.Delete();
+                        set.Delete();                       
                         set.MoveNext();
                     }
+                    set.StopEditing();
                     for (int i = 0; i < Ids.Length; i++)
                     {
                         rest = businessPoint.SearchExpression("Id=" + Ids[i].ToString());
@@ -821,6 +830,207 @@ namespace MapUtils
             }
             return result;
         }
+        /// <summary>
+        /// 删除指定Id的业务点
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns>是否删除成功</returns>
+        public bool deletePoint(int Id)
+        {
+            if (businessPoint != null)
+            {
+                Recordset rest = businessPoint.SearchExpression("Id=" + Id.ToString());
+                if (rest.EOF != true)
+                {                    
+                    try
+                    {
+                        rest.Delete();
+                        rest.StopEditing();
+                        this.map.Refresh();
+                    }
+                    catch (Exception e)
+                    {
+                        rest.StopEditing();
+                        this.map.Refresh();
+                    }
+                }               
+            }
+            return checkFile();
+        }
+        /// <summary>
+        /// 根据Id获得地图业务点信息
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        public _MapBussinessPoint getPointById(int Id)
+        {
+            _MapBussinessPoint point = null;
+            if (businessPoint != null)
+            {
+                Recordset rest = businessPoint.SearchExpression("Id=" + Id.ToString());
+                if (rest.EOF != true)
+                {
+                    point = new _MapBussinessPoint();
+                    point.Id = Id;
+                    point.Name = rest.Fields.Item("Name").Value.ToString();
+                    point.X = Convert.ToDouble(rest.Fields.Item("X").Value);
+                    point.Y = Convert.ToDouble(rest.Fields.Item("Y").Value);
+                }
+            }
+            return point;
+        }
+        /// <summary>
+        /// 更新业务点图层
+        /// </summary>
+        /// <param name="pointList">待更新的点列表</param>
+        /// <returns>是否更新成功</returns>
+        public bool updatePointLayer(List<_MapBussinessPoint> pointList)
+        {
+            if (businessPoint != null)
+            {
+                Recordset set = businessPoint.Records;
+                foreach (_MapBussinessPoint p in pointList)
+                {
+                    if (p != null && p.Id > 0)
+                    {
+                        Recordset rest = businessPoint.SearchExpression("Id=" + p.Id.ToString());
+                        try
+                        {
+                            if (rest.EOF == true)
+                            {
+                                if (p.X > 0 && p.Y > 0)
+                                {
+                                    MapObjects2.Point point = new MapObjects2.Point();
+                                    point.X = p.X;
+                                    point.Y = p.Y;
+
+                                    set.AddNew();
+                                    set.Fields.Item("Shape").Value = point;
+                                    set.Fields.Item("Id").Value = p.Id;
+                                    if (p.Name != null)
+                                    {
+                                        set.Fields.Item("Name").Value = p.Name;
+                                    }
+                                    set.Fields.Item("X").Value = p.X;
+                                    set.Fields.Item("Y").Value = p.Y;
+                                    set.Update();
+                                }                               
+                            }
+                            else
+                            {
+                                rest.Edit();
+                                if (p.X > 0 && p.Y > 0)
+                                {
+                                    MapObjects2.Point point = (MapObjects2.Point)rest.Fields.Item("Shape").Value;
+                                    point.X = p.X;
+                                    point.Y = p.Y;
+                                    rest.Fields.Item("Shape").Value = point;
+                                    rest.Fields.Item("X").Value = p.X;
+                                    rest.Fields.Item("Y").Value = p.Y;
+                                }
+                                if (p.Name != null)
+                                {
+                                    rest.Fields.Item("Name").Value = p.Name;
+                                }                                                               
+                                rest.Update();
+                            }
+                            rest.StopEditing();
+                            set.StopEditing();
+                            this.map.Refresh();
+                        }
+                        catch (Exception e)
+                        {
+                            rest.StopEditing();
+                            set.StopEditing();
+                            this.map.Refresh();
+                            return false;
+                        }                      
+                    }
+                }
+            }
+
+            return checkFile();
+        }
+
+        private bool restoreFile()
+        {
+            using (TransactionScope scope = new TransactionScope())
+            {
+                try
+                {
+                    string aimPath = this.dataBase + "\\CSX";
+                    if (aimPath[aimPath.Length - 1] != Path.DirectorySeparatorChar)
+                    {
+                        aimPath += Path.DirectorySeparatorChar;
+                    }
+                    string[] fileList = Directory.GetFileSystemEntries(aimPath, "businessPoint.*");
+                    foreach (string filePath in fileList)
+                    {
+                        File.Delete(filePath);
+                    }
+                    fileList = Directory.GetFileSystemEntries(aimPath, "Backup_businessPoint.*");
+                    foreach (string filePath in fileList)
+                    {
+                        string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
+                        string fileExName = fileName.Substring(fileName.IndexOf(".") + 1);
+                        File.Copy(filePath, aimPath + "businessPoint." + fileExName);
+                    }
+                    scope.Complete();
+                    return false;
+                }
+                catch (Exception e)
+                {
+                    scope.Dispose();
+                }
+            }
+            return true;     
+        }
+
+        private bool checkFile()
+        {
+            if (businessPoint != null)
+            {
+                Recordset rest = businessPoint.SearchExpression("Id=-1");
+                string aimPath = this.dataBase + "\\CSX";
+                if (aimPath[aimPath.Length - 1] != Path.DirectorySeparatorChar)
+                {
+                    aimPath += Path.DirectorySeparatorChar;
+                }
+                if (rest.EOF != true)
+                {
+                    return false;
+                }
+                else
+                {
+                    using (TransactionScope scope = new TransactionScope())
+                    {
+                        try
+                        {
+                            string[] fileList = Directory.GetFileSystemEntries(aimPath, "Backup_businessPoint.*");
+                            foreach (string filePath in fileList)
+                            {
+                                File.Delete(filePath);
+                            }
+                            fileList = Directory.GetFileSystemEntries(aimPath, "businessPoint.*");
+                            foreach (string filePath in fileList)
+                            {
+                                string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
+                                File.Copy(filePath, aimPath + "Backup_" + fileName);
+                            }
+                            scope.Complete();
+                            return true;
+                        }
+                        catch (Exception e)
+                        {
+                            scope.Dispose();
+                            return false;
+                        }
+                    }
+                    
+                }
+            }
+            return false;
+        }
     }
     
     /// <summary>
@@ -850,6 +1060,56 @@ namespace MapUtils
 
         public _MapScaleChangedEventArgs(double scale){
             Scale = scale;
+        }
+    }
+
+    public class _MapClickedEventArgs:EventArgs{
+        public readonly double X;
+        public readonly double Y;
+        public readonly double map_X;
+        public readonly double map_Y;
+
+        public _MapClickedEventArgs(double x,double y,MapObjects2.Point point){
+            this.X=x;
+            this.Y=y;
+            this.map_X = point.X;
+            this.map_Y = point.Y;
+        }
+    }
+
+    public class _MapBussinessPoint
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public double X { get; set; }
+
+        public double Y { get; set; }
+
+        public _MapBussinessPoint(int id, string name, double x, double y)
+        {
+            this.Id = id;
+            this.Name = name;
+            this.X = x;
+            this.Y = y;
+        }
+        public _MapBussinessPoint()
+        {
+            this.Id = -1;
+            this.X = -1;
+            this.Y = -1;
+        }
+        public _MapBussinessPoint(int id, string name)
+        {
+            this.Id = id;
+            this.Name = name;
+        }
+        public _MapBussinessPoint(int id, double x, double y)
+        {
+            this.Id = id;
+            this.X = x;
+            this.Y = y;
         }
     }
 }
