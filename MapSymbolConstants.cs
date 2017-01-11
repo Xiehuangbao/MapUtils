@@ -14,7 +14,7 @@ namespace MapUtils
 
         public static readonly uint BaseColorConstants = (uint)ColorTranslator.ToWin32(Color.FromArgb(240, 237, 229));
 
-        public static readonly uint BaseOutlineColorConstants = (uint)ColorTranslator.ToWin32(Color.FromArgb(178, 178, 178));
+        public static readonly uint BaseOutlineColorConstants = (uint)ColorTranslator.ToWin32(Color.FromArgb(255, 0, 0));
 
         public static readonly uint GreenColorConstants = (uint)ColorTranslator.ToWin32(Color.FromArgb(181, 210, 157));
 
@@ -33,6 +33,8 @@ namespace MapUtils
         public static readonly uint LabelColorConstants = (uint)ColorTranslator.ToWin32(Color.FromArgb(80,80,80));
 
         public static readonly uint RoadBaseColorConstants = (uint)ColorTranslator.ToWin32(Color.FromArgb(200, 200, 200));
+
+        public readonly stdole.StdFont CityExtendPointFont = new stdole.StdFont();
 
         public readonly stdole.StdFont HighwayLabelFont_L = new stdole.StdFont();
 
@@ -54,9 +56,21 @@ namespace MapUtils
 
         public readonly stdole.StdFont CountryRoad08LabelFont_S = new stdole.StdFont();
 
+        public readonly stdole.StdFont TownsNameLabelFont_L = new stdole.StdFont();
+
+        public readonly stdole.StdFont ProperNameLabelFont = new stdole.StdFont();
+
+        public readonly stdole.StdFont LivingPointLabelFont = new stdole.StdFont();
+
+        public readonly stdole.StdFont TownsNameLabelFont_S = new stdole.StdFont();
+
+        public readonly stdole.StdFont CountyNameLableFont = new stdole.StdFont();
+
         public readonly stdole.StdFont OtherRoadLabelFont_L = new stdole.StdFont();
 
         public readonly stdole.StdFont OtherRoadLabelFont_S = new stdole.StdFont();
+
+        public readonly IMoLabelPlacer CityExtendPointPlacer = new LabelPlacerClass();
 
         public readonly IMoLabelPlacer HighWayLabelPlacer_L = new LabelPlacerClass();
 
@@ -78,6 +92,18 @@ namespace MapUtils
 
         public readonly IMoLabelPlacer CountryRoad08LabelPlacer_S = new LabelPlacerClass();
 
+        public readonly IMoLabelPlacer ProperNameLabelPlacer = new LabelPlacerClass();
+
+        public readonly IMoLabelPlacer FactoryPointLabelPlacer = new LabelPlacerClass();
+
+        public readonly IMoLabelPlacer LivingPointLablePlacer = new LabelPlacerClass();
+
+        public readonly IMoLabelPlacer TownsNameLabelPlacer_L = new LabelPlacerClass();
+
+        public readonly IMoLabelPlacer TownsNameLabelPlacer_S = new LabelPlacerClass();
+
+        public readonly IMoLabelPlacer CountyNameLabelPlacer = new LabelPlacerClass();
+
         public readonly IMoLabelPlacer OtherRoadLabelPlacer_L = new LabelPlacerClass();
 
         public readonly IMoLabelPlacer OtherRoadLabelPlacer_S = new LabelPlacerClass();
@@ -85,6 +111,18 @@ namespace MapUtils
 
         public MapSymbolConstants()
         {
+            CityExtendPointFont.Bold = false;
+            CityExtendPointFont.Name = "宋体";
+            CityExtendPointFont.Size = 11;
+
+            CityExtendPointPlacer.PlaceAbove = false;
+            CityExtendPointPlacer.PlaceBelow = false;
+            CityExtendPointPlacer.PlaceOn = true;
+            CityExtendPointPlacer.AllowDuplicates = false;
+            CityExtendPointPlacer.Field = "Name";
+            CityExtendPointPlacer.DefaultSymbol.Font = CityExtendPointFont;
+            CityExtendPointPlacer.DefaultSymbol.Color = LabelColorConstants;
+
             HighwayLabelFont_L.Bold = true;
             HighwayLabelFont_L.Name = "宋体";
             HighwayLabelFont_L.Size = 12;
@@ -156,10 +194,10 @@ namespace MapUtils
             AlertPointLabelPlacer_S.DefaultSymbol.Color = LabelColorConstants;
 
 
-            CountryRoad06LabelFont_L.Name = "Arial";
-            CountryRoad06LabelFont_L.Size = 10;
-            CountryRoad06LabelFont_S.Name = "Arial";
-            CountryRoad06LabelFont_S.Size = 10;
+            CountryRoad06LabelFont_L.Name = "宋体";
+            CountryRoad06LabelFont_L.Size = 11;
+            CountryRoad06LabelFont_S.Name = "宋体";
+            CountryRoad06LabelFont_S.Size = 11;
 
             CountryRoad06LabelPlacer_L.PlaceAbove = false;
             CountryRoad06LabelPlacer_L.PlaceBelow = false;
@@ -177,10 +215,10 @@ namespace MapUtils
             CountryRoad06LabelPlacer_S.DefaultSymbol.Font = CountryRoad06LabelFont_S;
             CountryRoad06LabelPlacer_S.DefaultSymbol.Color = LabelColorConstants;
 
-            CountryRoad08LabelFont_L.Name = "Arial";
-            CountryRoad08LabelFont_L.Size = 10;
-            CountryRoad08LabelFont_S.Name = "Arial";
-            CountryRoad08LabelFont_S.Size = 10;
+            CountryRoad08LabelFont_L.Name = "宋体";
+            CountryRoad08LabelFont_L.Size = 11;
+            CountryRoad08LabelFont_S.Name = "宋体";
+            CountryRoad08LabelFont_S.Size = 11;
 
             CountryRoad08LabelPlacer_L.PlaceAbove = false;
             CountryRoad08LabelPlacer_L.PlaceBelow = false;
@@ -198,10 +236,79 @@ namespace MapUtils
             CountryRoad08LabelPlacer_S.DefaultSymbol.Font = CountryRoad08LabelFont_S;
             CountryRoad08LabelPlacer_S.DefaultSymbol.Color = LabelColorConstants;
 
+            ProperNameLabelFont.Name = "宋体";
+            ProperNameLabelFont.Size = 10;
 
-            OtherRoadLabelFont_L.Name = "Arial";
+            ProperNameLabelPlacer.PlaceAbove = false;
+            ProperNameLabelPlacer.PlaceBelow = false;
+            ProperNameLabelPlacer.PlaceOn = true;
+            ProperNameLabelPlacer.AllowDuplicates = false;
+            ProperNameLabelPlacer.Field = "Name";
+            ProperNameLabelPlacer.DefaultSymbol.Font = ProperNameLabelFont;
+            ProperNameLabelPlacer.DefaultSymbol.Color = (uint)ColorTranslator.ToWin32(Color.FromArgb(150, 150, 150));
+
+
+            LivingPointLabelFont.Name = "宋体";
+            LivingPointLabelFont.Size = 9;
+
+            LivingPointLablePlacer.PlaceAbove = false;
+            LivingPointLablePlacer.PlaceBelow = true;
+            LivingPointLablePlacer.PlaceOn = false;
+            LivingPointLablePlacer.AllowDuplicates = false;
+            LivingPointLablePlacer.Field = "Name";
+            LivingPointLablePlacer.SymbolHeight = 20;
+            LivingPointLablePlacer.DefaultSymbol.Font = LivingPointLabelFont;
+            LivingPointLablePlacer.DefaultSymbol.Color = LabelColorConstants;
+
+            FactoryPointLabelPlacer.PlaceAbove = false;
+            FactoryPointLabelPlacer.PlaceBelow = true;
+            FactoryPointLabelPlacer.PlaceOn = false;
+            FactoryPointLabelPlacer.AllowDuplicates = false;
+            FactoryPointLabelPlacer.Field = "Name_1";
+            FactoryPointLabelPlacer.SymbolHeight = 20;
+            FactoryPointLabelPlacer.DefaultSymbol.Font = LivingPointLabelFont;
+            FactoryPointLabelPlacer.DefaultSymbol.Color = LabelColorConstants;
+
+            //TownsNameLabelFont_L.Bold = true;
+            TownsNameLabelFont_L.Name = "宋体";
+            TownsNameLabelFont_L.Size = 12;
+            //TownsNameLabelFont_S.Bold = true;
+            TownsNameLabelFont_S.Name = "宋体";
+            TownsNameLabelFont_S.Size = 9;
+
+            TownsNameLabelPlacer_L.PlaceAbove = true;
+            TownsNameLabelPlacer_L.PlaceBelow = false;
+            TownsNameLabelPlacer_L.PlaceOn = false;
+            TownsNameLabelPlacer_L.AllowDuplicates = false;
+            TownsNameLabelPlacer_L.Field = "Name";
+            TownsNameLabelPlacer_L.SymbolHeight = 20;
+            TownsNameLabelPlacer_L.DefaultSymbol.Font = TownsNameLabelFont_L;
+            TownsNameLabelPlacer_L.DefaultSymbol.Color = LabelColorConstants;
+
+            TownsNameLabelPlacer_S.PlaceAbove = true;
+            TownsNameLabelPlacer_S.PlaceBelow = false;
+            TownsNameLabelPlacer_S.PlaceOn = false;
+            TownsNameLabelPlacer_S.AllowDuplicates = false;
+            TownsNameLabelPlacer_S.Field = "Name";
+            TownsNameLabelPlacer_S.SymbolHeight = 10;
+            TownsNameLabelPlacer_S.DefaultSymbol.Font = TownsNameLabelFont_S;
+            TownsNameLabelPlacer_S.DefaultSymbol.Color = LabelColorConstants;
+
+            CountyNameLableFont.Name = "宋体";
+            CountyNameLableFont.Size = 12;
+
+            CountyNameLabelPlacer.PlaceAbove = true;
+            CountyNameLabelPlacer.PlaceBelow = false;
+            CountyNameLabelPlacer.PlaceOn = false;
+            CountyNameLabelPlacer.AllowDuplicates = false;
+            CountyNameLabelPlacer.Field = "Name";
+            CountyNameLabelPlacer.SymbolHeight = 20;
+            CountyNameLabelPlacer.DefaultSymbol.Font = CountyNameLableFont;
+            CountyNameLabelPlacer.DefaultSymbol.Color = LabelColorConstants;
+
+            OtherRoadLabelFont_L.Name = "宋体";
             OtherRoadLabelFont_L.Size = 10;
-            OtherRoadLabelFont_S.Name = "Arial";
+            OtherRoadLabelFont_S.Name = "宋体";
             OtherRoadLabelFont_S.Size = 10;
 
             OtherRoadLabelPlacer_L.PlaceAbove = false;

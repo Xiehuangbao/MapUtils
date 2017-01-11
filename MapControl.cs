@@ -35,6 +35,9 @@ namespace MapUtils
 
         private DataConnection dc = new DataConnectionClass();
 
+        //private MapLayer cityExtendFace = new MapLayerClass();
+        private MapLayer cityExtendLine = new MapLayerClass();
+        private MapLayer cityExtendPoint = new MapLayerClass();
         private MapLayer layer1 = new MapLayerClass();
         private MapLayer layer2 = new MapLayerClass();
         private MapLayer layer3 = new MapLayerClass();
@@ -45,9 +48,18 @@ namespace MapUtils
         private MapLayer countryRoad06 = new MapLayerClass();
         private MapLayer countryRoad06_1 = new MapLayerClass();
         private MapLayer countryRoad08 = new MapLayerClass();
+        private MapLayer baseOutline = new MapLayerClass();
+        private MapLayer properName = new MapLayerClass();
+        private MapLayer factoryPoint = new MapLayerClass();
+        private MapLayer LivingPoint = new MapLayerClass();
+        private MapLayer townsName = new MapLayerClass();
+        private MapLayer countyName = new MapLayerClass();
         private MapLayer businessPoint = new MapLayerClass();
         private MapLayer alertPoint = new MapLayerClass();
 
+        //private Symbol cityExtendFaceSymbol = null;
+        private Symbol cityExtendPointSymbol = null;
+        private Symbol cityExtendLineSymbol = null;
         private Symbol base_symbol = null;
         private Symbol water_symbol = null;
         private Symbol green_symbol = null;
@@ -58,6 +70,12 @@ namespace MapUtils
         private Symbol countryRoad06_symbol = null;
         private Symbol countryRoad06_1_symbol = null;
         private Symbol countryRoad08_symbol = null;
+        private Symbol baseOutline_symbol = null;
+        private Symbol properName_symbol = null;
+        private Symbol factoryPoint_symbol = null;
+        private Symbol LivingPoint_symbol = null;
+        private Symbol townsName_symbol = null;
+        private Symbol countyName_symbol = null;
         private Symbol businessPoint_symbol = null;
         private Symbol alertPoints_symbol = null;
 
@@ -202,7 +220,7 @@ namespace MapUtils
                     }
                     break;
                 case "CountryRoad06.shp":
-                    if (this.scale < 12000)
+                    if (this.scale < 20000)
                     {
                         lyr.Renderer = symbolConst.CountryRoad06LabelPlacer_S;
                         nationalRoad_symbol.Size = 8;
@@ -220,7 +238,7 @@ namespace MapUtils
                     }
                     break;
                 case "CountryRoad08.shp":
-                    if (this.scale < 10000)
+                    if (this.scale < 15000)
                     {
                         lyr.Renderer = symbolConst.CountryRoad08LabelPlacer_S;
                         countryRoad06_symbol.Size = 8;
@@ -259,8 +277,54 @@ namespace MapUtils
                         townRoad.Renderer = new LabelPlacerClass();
                     }
                     break;
+                case "LivingPoint.shp":
+                    if (this.scale < 15000)
+                    {
+                        townsName.Renderer = symbolConst.TownsNameLabelPlacer_L;
+                        
+                        LivingPoint.Visible = true;
+                    }
+                    else
+                    {
+                        townsName.Renderer = symbolConst.TownsNameLabelPlacer_S;
+                        
+                        LivingPoint.Visible = false;
+                    }
+                    break;
+                case "FactoryPoint.shp":
+                    if (this.scale < 10000)
+                    {
+                        factoryPoint.Visible = true;
+                    }
+                    else
+                    {
+                        factoryPoint.Visible = false;
+                    }
+                    break;
+                case "ProperName.shp":
+                    if (this.scale < 18000)
+                    {
+                        properName.Visible = true;
+                    }
+                    else
+                    {
+                        properName.Visible = false;
+                    }
+                    break;
+                case "CountyName.shp":
+                    if (this.scale < 70000)
+                    {
+                        countyName.Renderer = symbolConst.CountyNameLabelPlacer;
+                    }
+                    else
+                    {
+                        countyName.Renderer = new LabelPlacerClass();
+                    }
+                    break;
 
-            }           
+            }
+            
+            
         }
         /// <summary>
         /// 加载地图
@@ -270,17 +334,19 @@ namespace MapUtils
         {
             this.dataBase = dataDirectory;
 
-            restoreFile();
+            //restoreFile();
             //定义数据连接和图层
             #region
             
             
             #endregion
             dc.Database = this.dataBase+"\\CSX";                //指定连接位置
-            try
-            {
+            restoreFile();
                 if (dc.Connect())                           //连接
                 {
+                    //cityExtendFace.GeoDataset = dc.FindGeoDataset("cityExtendFace.shp");
+                    cityExtendPoint.GeoDataset = dc.FindGeoDataset("cityExtendPoint.shp");
+                    cityExtendLine.GeoDataset = dc.FindGeoDataset("cityExtendLine.shp");
                     layer1.GeoDataset = dc.FindGeoDataset("CSX.shp");
                     layer2.GeoDataset = dc.FindGeoDataset("Water.shp");
                     layer3.GeoDataset = dc.FindGeoDataset("Green.shp");
@@ -291,9 +357,18 @@ namespace MapUtils
                     countryRoad06.GeoDataset = dc.FindGeoDataset("CountryRoad06.shp");
                     countryRoad06_1.GeoDataset = dc.FindGeoDataset("CountryRoad06_1.shp");
                     countryRoad08.GeoDataset = dc.FindGeoDataset("CountryRoad08.shp");
+                    baseOutline.GeoDataset = dc.FindGeoDataset("BaseOutline.shp");
+                    properName.GeoDataset = dc.FindGeoDataset("ProperName.shp");
+                    factoryPoint.GeoDataset = dc.FindGeoDataset("FactoryPoint.shp");
+                    LivingPoint.GeoDataset = dc.FindGeoDataset("LivingPoint.shp");
+                    townsName.GeoDataset = dc.FindGeoDataset("TownsName.shp");
+                    countyName.GeoDataset = dc.FindGeoDataset("CountyName.shp");
                     businessPoint.GeoDataset = dc.FindGeoDataset("businessPoint.shp");
                     alertPoint.GeoDataset = dc.FindGeoDataset("Alerts.shp");
                     businessPoint.Tag = "businessPoint";
+                    //cityExtendFaceSymbol = cityExtendFace.Symbol;
+                    cityExtendLineSymbol = cityExtendLine.Symbol;
+                    cityExtendPointSymbol = cityExtendPoint.Symbol;
                     base_symbol = layer1.Symbol;
                     water_symbol = layer2.Symbol;
                     green_symbol = layer3.Symbol;
@@ -304,14 +379,31 @@ namespace MapUtils
                     countryRoad06_symbol = countryRoad06.Symbol;
                     countryRoad06_1_symbol = countryRoad06_1.Symbol;
                     countryRoad08_symbol = countryRoad08.Symbol;
+                    baseOutline_symbol = baseOutline.Symbol;
+                    properName_symbol = properName.Symbol;
+                    factoryPoint_symbol = factoryPoint.Symbol;
+                    LivingPoint_symbol = LivingPoint.Symbol;
+                    townsName_symbol = townsName.Symbol;
+                    countyName_symbol = countyName.Symbol;
                     businessPoint_symbol = businessPoint.Symbol;
                     alertPoints_symbol = alertPoint.Symbol;
                     //设置符号样式
                     #region
+                    //cityExtendFaceSymbol.SymbolType = SymbolTypeConstants.moFillSymbol;
+                    //cityExtendFaceSymbol.Color = (uint)ColorTranslator.ToWin32(Color.FromArgb(255,255,255));
+
+                    cityExtendPointSymbol.SymbolType = SymbolTypeConstants.moPointSymbol;
+                    cityExtendPointSymbol.Outline = false;
+                    cityExtendPointSymbol.Color = (uint)ColorTranslator.ToWin32(Color.FromArgb(255, 255, 255));
+
+                    cityExtendLineSymbol.SymbolType = SymbolTypeConstants.moLineSymbol;
+                    cityExtendLineSymbol.Color = MapSymbolConstants.BaseOutlineColorConstants;
+                    cityExtendLineSymbol.Size = 1;
+
                     base_symbol.SymbolType = SymbolTypeConstants.moFillSymbol;
                     base_symbol.Color = MapSymbolConstants.BaseColorConstants;
-                    base_symbol.Outline = true;
-                    base_symbol.OutlineColor = MapSymbolConstants.BaseOutlineColorConstants;
+                    base_symbol.Outline = false;
+                    //base_symbol.OutlineColor = MapSymbolConstants.BaseOutlineColorConstants;
 
                     water_symbol.SymbolType = SymbolTypeConstants.moFillSymbol;
                     water_symbol.Color = MapSymbolConstants.WaterColorConstants;
@@ -356,6 +448,32 @@ namespace MapUtils
                     countryRoad08_symbol.Color = MapSymbolConstants.CountryRoad08ColorConstants;
                     countryRoad08_symbol.Size = 3;
 
+                    baseOutline_symbol.Color = MapSymbolConstants.BaseOutlineColorConstants;
+
+                    properName_symbol.SymbolType = SymbolTypeConstants.moPointSymbol;
+                    properName_symbol.Color = MapSymbolConstants.BaseColorConstants;
+                    properName_symbol.Outline = false;
+
+                    factoryPoint_symbol.SymbolType = SymbolTypeConstants.moPointSymbol;
+                    factoryPoint_symbol.Style = 0;
+                    factoryPoint_symbol.Color = (uint)ColorTranslator.ToWin32(Color.FromArgb(50, 50, 50));
+                    factoryPoint_symbol.Size = 5;
+
+                    LivingPoint_symbol.SymbolType = SymbolTypeConstants.moPointSymbol;
+                    LivingPoint_symbol.Style = 0;
+                    LivingPoint_symbol.Color = (uint)ColorTranslator.ToWin32(Color.FromArgb(0, 50, 255)); 
+                    LivingPoint_symbol.Size = 5;
+
+                    townsName_symbol.SymbolType = SymbolTypeConstants.moPointSymbol;
+                    townsName_symbol.Style = 1;
+                    townsName_symbol.Color = (uint)ColorTranslator.ToWin32(Color.FromArgb(255, 0, 0)); 
+                    townsName_symbol.Size = 5;
+
+                    countyName_symbol.SymbolType = SymbolTypeConstants.moPointSymbol;
+                    countyName_symbol.Style = 0;
+                    countyName_symbol.Color = (uint)ColorTranslator.ToWin32(Color.FromArgb(255, 0, 0));
+                    countyName_symbol.Size = 7;
+
                     businessPoint.Visible = false;
                     countryRoad06_1.Visible = false;
                     CustomMarker cm = new CustomMarker(this.dataBase + "\\res\\drop_black_18dp.png");
@@ -368,15 +486,22 @@ namespace MapUtils
                     #endregion
                     //设置标注
                     #region
+                    cityExtendPoint.Renderer = symbolConst.CityExtendPointPlacer;
                     highway.Renderer = symbolConst.HighWayLabelPlacer_S;
                     //nationalRoad.Renderer = symbolConst.OtherRoadLabelPlacer_S;
                     //stateRoad.Renderer = symbolConst.OtherRoadLabelPlacer_S;
                     //townRoad.Renderer = symbolConst.OtherRoadLabelPlacer_S;
+                    properName.Renderer = symbolConst.ProperNameLabelPlacer;
+                    factoryPoint.Renderer = symbolConst.FactoryPointLabelPlacer;
+                    LivingPoint.Renderer = symbolConst.LivingPointLablePlacer;
                     businessPoint.Renderer = symbolConst.PointLabelPlacer_S;
                     countryRoad06.Renderer = symbolConst.CountryRoad06LabelPlacer_S;
                     countryRoad08.Renderer = symbolConst.CountryRoad08LabelPlacer_S;
                     alertPoint.Renderer = symbolConst.AlertPointLabelPlacer_S;
                     #endregion
+                    //map.Layers.Add(cityExtendFace);
+                    map.Layers.Add(cityExtendPoint);
+                    map.Layers.Add(cityExtendLine);
                     map.Layers.Add(layer1);
                     map.Layers.Add(layer2);
                     map.Layers.Add(layer3);
@@ -387,6 +512,12 @@ namespace MapUtils
                     map.Layers.Add(stateRoad);
                     map.Layers.Add(nationalRoad);
                     map.Layers.Add(highway);
+                    map.Layers.Add(baseOutline);
+                    map.Layers.Add(properName);
+                    map.Layers.Add(factoryPoint);
+                    map.Layers.Add(LivingPoint);
+                    map.Layers.Add(townsName);
+                    map.Layers.Add(countyName);
                     map.Layers.Add(businessPoint);
                     map.Layers.Add(alertPoint);
                     map.CenterAt(113.075, 28.249);
@@ -394,11 +525,7 @@ namespace MapUtils
                     map.Refresh();
                     //calScale();
                 }
-            }
-            catch (Exception e)
-            {
                 return;
-            }
             
         }
         /// <summary>
@@ -856,6 +983,30 @@ namespace MapUtils
                 }               
             }
             return checkFile();
+            //return true;
+        }
+        public bool clearBusinessPoint()
+        {
+            if (businessPoint != null)
+            {
+                Recordset set = businessPoint.Records;
+                try
+                {
+                    while (set.EOF != true)
+                    {
+                        set.Delete();
+                        set.MoveNext();
+                    }
+                    set.StopEditing();
+                }
+                catch (Exception e)
+                {
+                    set.StopEditing();
+                }
+                map.Refresh();
+            }
+            return checkFile();
+            //return true;
         }
         /// <summary>
         /// 根据Id获得地图业务点信息
@@ -950,6 +1101,7 @@ namespace MapUtils
             }
 
             return checkFile();
+            //return true;
         }
 
         private bool restoreFile()
@@ -964,10 +1116,10 @@ namespace MapUtils
                         aimPath += Path.DirectorySeparatorChar;
                     }
                     string[] fileList = Directory.GetFileSystemEntries(aimPath, "businessPoint.*");
-                    foreach (string filePath in fileList)
-                    {
-                        File.Delete(filePath);
-                    }
+                    //foreach (string filePath in fileList)
+                    //{
+                    //    File.Delete(filePath);
+                    //}
                     fileList = Directory.GetFileSystemEntries(aimPath, "Backup_businessPoint.*");
                     foreach (string filePath in fileList)
                     {
@@ -983,7 +1135,7 @@ namespace MapUtils
                     scope.Dispose();
                 }
             }
-            return true;     
+            return true;
         }
 
         private bool checkFile()
@@ -1000,36 +1152,36 @@ namespace MapUtils
                 {
                     return false;
                 }
-                else
-                {
-                    using (TransactionScope scope = new TransactionScope())
-                    {
-                        try
-                        {
-                            string[] fileList = Directory.GetFileSystemEntries(aimPath, "Backup_businessPoint.*");
-                            foreach (string filePath in fileList)
-                            {
-                                File.Delete(filePath);
-                            }
-                            fileList = Directory.GetFileSystemEntries(aimPath, "businessPoint.*");
-                            foreach (string filePath in fileList)
-                            {
-                                string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
-                                File.Copy(filePath, aimPath + "Backup_" + fileName);
-                            }
-                            scope.Complete();
-                            return true;
-                        }
-                        catch (Exception e)
-                        {
-                            scope.Dispose();
-                            return false;
-                        }
-                    }
-                    
-                }
+                //else
+                //{
+                //    using (TransactionScope scope = new TransactionScope())
+                //    {
+                //        try
+                //        {
+                //            string[] fileList = Directory.GetFileSystemEntries(aimPath, "Backup_businessPoint.*");
+                //            foreach (string filePath in fileList)
+                //            {
+                //                File.Delete(filePath);
+                //            }
+                //            fileList = Directory.GetFileSystemEntries(aimPath, "businessPoint.*");
+                //            foreach (string filePath in fileList)
+                //            {
+                //                string fileName = filePath.Substring(filePath.LastIndexOf("\\") + 1);
+                //                File.Copy(filePath, aimPath + "Backup_" + fileName);
+                //            }
+                //            scope.Complete();
+                //            return true;
+                //        }
+                //        catch (Exception e)
+                //        {
+                //            scope.Dispose();
+                //            return false;
+                //        }
+                //    }
+
+                //}
             }
-            return false;
+            return true;
         }
     }
     

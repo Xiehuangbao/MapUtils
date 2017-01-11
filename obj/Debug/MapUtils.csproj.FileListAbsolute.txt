@@ -11,4 +11,5 @@ D:\VS_project\DXApplication2\MapUtils\bin\Debug\Interop.MapObjects2.dll
 D:\VS_project\DXApplication2\MapUtils\bin\Debug\AxInterop.MapObjects2.dll
 D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.exe
 D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.pdb
+D:\VS_project\DXApplication2\MapUtils\bin\Debug\stdole.dll
 D:\VS_project\DXApplication2\MapUtils\obj\Debug\MapUtils.csprojResolveAssemblyReference.cache

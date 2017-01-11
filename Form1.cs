@@ -106,5 +106,10 @@ namespace MapUtils
             mc.updatePointLayer(pl);
             mc.centerAt(new int[] { 410016 });
         }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            mc.clearBusinessPoint();
+        }
     }
 }
